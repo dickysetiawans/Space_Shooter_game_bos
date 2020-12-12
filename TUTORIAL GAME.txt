@@ -1,0 +1,11 @@
+Tutorial 
+
+1. Download Python
+
+2. Instal path python
+ 
+3. Buka cmd atau termial
+ 
+4. ketikan pip install pygame
+
+5. jalankan game dengan cmd atau terminal atau dengan code editor 
