@@ -13,17 +13,12 @@ mixer.init()
 FPS = 60
 FramePerSec = pygame.time.Clock()
 
- 
-
-
 '''buat tampilan'''
 panjang = 500
 lebar = 650
 
 tampilan = pygame.display.set_mode((panjang, lebar))
-
 pygame.display.set_caption("Galaxy Shooter")
-
 
 
 '''Text'''
@@ -36,20 +31,23 @@ text50 = pygame.font.SysFont('comicsans', 45)
 bom_music = pygame.mixer.Sound('img/bom.wav')
 bom_music.set_volume(0.25) 
 
+'''Laser music'''
 laser_music = pygame.mixer.Sound('img/laser2.wav')
 laser_music.set_volume(0.25)
 
-
-
+'''Bom Music'''
 bom_hit_fx = pygame.mixer.Sound('img/bom.wav')
-bom_hit_fx.set_volume(0.70) 
+bom_hit_fx.set_volume(0.70)
 
+'''Bom music'''
 bom_hit_music = pygame.mixer.Sound('img/bom.wav')
 bom_hit_music.set_volume(0.25) 
 
+'''Warning music'''
 warning_fx = pygame.mixer.Sound('img/warning.wav')
 warning_fx.set_volume(0.25) 
 
+'''Background music'''
 pygame.mixer.music.load("img/music.mp3")
 pygame.mixer.music.play(-1, 0.0)
 pygame.mixer.music.set_volume(0.75)
@@ -77,6 +75,7 @@ def text_bos():
 	bos_label = text30.render("Bos Enemy", 1, (putih))
 	tampilan.blit(bos_label, (10, 10))
 
+
 '''Player Space Shoter'''
 class Pesawat(pygame.sprite.Sprite):
 	def __init__(self, x, y, darah):
@@ -88,17 +87,15 @@ class Pesawat(pygame.sprite.Sprite):
 		self.health_remaining = darah
 		self.last_shoot = pygame.time.get_ticks()
 
-
 	def update(self):
 		'''Kecepatan bergegerak'''
 		kecepatan = 8
+		speed = 5 # Ecepatan bergerak ke atas bawah
 
 		'''Colldown'''
 		colldown = 500
 		COLLDOWN = 100
-		game_over = 0
-
-		speed = 5
+		game_over = 0		
 
 		'''Keys/ Tombol untuk menjalankannya'''
 		key = pygame.key.get_pressed()
@@ -131,18 +128,11 @@ class Pesawat(pygame.sprite.Sprite):
 		self.mask = pygame.mask.from_surface(self.image)
 
 
-		'''Menggambar darah'''
-		pygame.draw.rect(tampilan, merah, (self.rect.x, (self.rect.bottom + 10), self.rect.width, 15))
-		if self.health_remaining > 0:
-			pygame.draw.rect(tampilan, hijau, (self.rect.x, (self.rect.bottom + 10), int(self.rect.width * (self.health_remaining / self.health_start)),15))
-		elif self.health_remaining <= 0:
-			bom_hit_music.play()
-			bom = Bom(self.rect.centerx, self.rect.centery, 3)
-			bom_group.add(bom)
-			self.kill()
-		
-
-
+		if self.health_remaining <= 0:
+			bom_hit_music.play()						
+			lost = True
+			text_lost()
+										
 '''Musuh class'''
 class Musuh(pygame.sprite.Sprite):
 	def __init__(self, x, y, health):
@@ -170,15 +160,27 @@ class Musuh(pygame.sprite.Sprite):
 			peluru_musuh = Peluru_Musuh(self.rect.centerx, self.rect.bottom)
 			peluru_musuh_group.add(peluru_musuh)
 			self.last_alien_shoot = time_now
+
+		'''Menggambar darah'''
+		pygame.draw.rect(tampilan, merah, (self.rect.x, (self.rect.top - 20), self.rect.width, 7))
+		if self.health_remaining > 0:
+			pygame.draw.rect(tampilan, hijau, (self.rect.x, (self.rect.top - 20), int(self.rect.width * (self.health_remaining / self.health_start)),7))
+
 		if self.health_remaining == 600:
 			self.alien_colldown -= 150
 			bom = Bom(self.rect.centerx, self.rect.centery, 3)
 			bom_group.add(bom)
 			bom_hit_music.play()
 		elif self.health_remaining == 450:
-			self.alien_colldown += 70
+			self.alien_colldown += 80
 			bom = Bom(self.rect.centerx, self.rect.centery, 3)
-			bom_group.add(bom)	
+			bom_group.add(bom)
+			bom_hit_music.play()
+		elif self.health_remaining == 220:
+			self.alien_colldown -= 70
+			bom = Bom(self.rect.centerx, self.rect.centery, 3)
+			bom_group.add(bom)
+			bom_hit_music.play()	
 		elif self.health_remaining <= 0:			
 			bom = Bom(self.rect.centerx, self.rect.centery, 3)
 			bom_group.add(bom)
@@ -239,13 +241,17 @@ class Peluru_Musuh(pygame.sprite.Sprite):
 		self.rect.y += 9
 		if self.rect.top > lebar:
 			self.kill()
-		if pygame.sprite.spritecollide(self, ship_group, False, pygame.sprite.collide_mask):
+		if pygame.sprite.spritecollide(self, ship_group, False):
 			self.kill()
-			ship.health_remaining -= 15
+			ship.health_remaining -= 10
 			bom_music.play()
 			bom = Bom(self.rect.centerx, self.rect.centery, 2)
 			bom_group.add(bom)
-
+		if ship.health_remaining <= 0:
+			if pygame.sprite.spritecollide(self, ship_group, True):
+				bom = Bom(self.rect.centerx, self.rect.centery, 3)
+				bom_group.add(bom)
+				self.kill()
 
 
 '''bom class'''				
@@ -286,10 +292,6 @@ class Bom(pygame.sprite.Sprite):
 			self.kill()
 
 
-
-
-
-
 '''	Buat spiret gruop'''
 ship_group = pygame.sprite.Group()
 peluru_group = pygame.sprite.Group()
@@ -304,7 +306,7 @@ ship = Pesawat(int(panjang / 2), lebar - 100, 100)
 ship_group.add(ship)
 
 '''Musuh'''
-musuh = Musuh(int(panjang / 2), lebar - 500, 1000)
+musuh = Musuh(int(panjang / 2), lebar - 500, 900)
 musuh_group.add(musuh)
 
 '''Background bergerak'''                   
@@ -333,12 +335,10 @@ class Background():
          tampilan.blit(self.bgimage, (self.bgX1, self.bgY1))
          tampilan.blit(self.bgimage, (self.bgX2, self.bgY2))
 
-'''Setting up Sprites'''
- 
+
 back_ground = Background()
 
-
-
+	
 '''Game Looping'''
 run = True
 while run:          
@@ -351,9 +351,7 @@ while run:
 	    ship.update()
 	    peluru_group.update()
 	    musuh_group.update()
-	    peluru_musuh_group.update()		
-	   	
-
+	    peluru_musuh_group.update()				   	
 
     bom_group.update()
     peluru_laser_group.update()
@@ -375,11 +373,9 @@ while run:
     	text('WARNING!!', text40, putih, int(panjang / 2 - 110), int(lebar / 2 + 10))
     	count_timer = pygame.time.get_ticks()	
     	warning_fx.play()
-    	if count_timer - last_count > 1000:
-    	
+    	if count_timer - last_count > 1000:    	
     		countdown -= 1 
     		last_count = count_timer
-
 
     pygame.display.update()
     FramePerSec.tick(FPS)
