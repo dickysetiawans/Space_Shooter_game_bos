@@ -3,7 +3,8 @@ from pygame.locals import *
 from pygame import mixer
 import random
 import time
- 
+import text 
+
 '''install''' 
 pygame.init()
 
@@ -22,9 +23,9 @@ pygame.display.set_caption("Galaxy Shooter")
 
 
 '''Text'''
-text30 = pygame.font.SysFont('Constantia', 30)
-text40 = pygame.font.SysFont('Constantia', 40)
-text50 = pygame.font.SysFont('comicsans', 45)
+text.text30 = pygame.font.SysFont('Constantia', 30)
+text.text40 = pygame.font.SysFont('Constantia', 40)
+text.text50 = pygame.font.SysFont('comicsans', 45)
 
 
 '''Music'''
@@ -45,7 +46,7 @@ bom_hit_music.set_volume(0.25)
 
 '''Warning music'''
 warning_fx = pygame.mixer.Sound('img/warning.wav')
-warning_fx.set_volume(0.25) 
+warning_fx.set_volume(0.05) 
 
 '''Background music'''
 pygame.mixer.music.load("img/music.mp3")
@@ -55,26 +56,13 @@ pygame.mixer.music.set_volume(0.75)
 
 rows = 1
 cols = 1
-merah = (255,0,0)
-hijau = (0,255,0)
-putih = (255,255,255) 
+text.merah = (255,0,0)
+text.hijau = (0,255,0)
+text.putih = (255,255,255) 
 alien_colldown = 1000
 last_alien_shoot = pygame.time.get_ticks()
 countdown = 14
 last_count = pygame.time.get_ticks()
-
-'''Text'''
-def text(text, font, text_col, x, y):
-	img = font.render(text, True, text_col)
-	tampilan.blit(img, (x, y))
-
-def draw_text():
-		level_label = text50.render("Level: 5", 1, (putih))
-		tampilan.blit(level_label, (panjang - level_label.get_width() - 10, 10))
-def text_bos():
-	bos_label = text30.render("Bos Enemy", 1, (putih))
-	tampilan.blit(bos_label, (10, 10))
-
 
 '''Player Space Shoter'''
 class Pesawat(pygame.sprite.Sprite):
@@ -130,9 +118,7 @@ class Pesawat(pygame.sprite.Sprite):
 
 		if self.health_remaining <= 0:
 			bom_hit_music.play()						
-			lost = True
-			text_lost()
-										
+			lost = True										
 '''Musuh class'''
 class Musuh(pygame.sprite.Sprite):
 	def __init__(self, x, y, health):
@@ -203,12 +189,12 @@ class Peluru(pygame.sprite.Sprite):
 		if pygame.sprite.spritecollide(self, musuh_group, False):
 			self.kill()
 			bom_music.play()
-			musuh.health_remaining -=2
+			musuh.health_remaining -= 2
 			bom = Bom(self.rect.centerx, self.rect.centery, 1)
 			bom_group.add(bom)
 
 
-'''laser player class'''
+'''laser player class''' 
 class Peluru_laser(pygame.sprite.Sprite):
 	def __init__(self, x, y,):
 		pygame.sprite.Sprite.__init__(self)
@@ -363,8 +349,8 @@ while run:
     peluru_musuh_group.draw(tampilan)
     bom_group.draw(tampilan)
     peluru_laser_group.draw(tampilan)
-    draw_text()
-    text_bos()
+    text.draw_text()
+    text.text_bos()
     '''Tombol atau keys '''   
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT:
@@ -379,5 +365,5 @@ while run:
 
     pygame.display.update()
     FramePerSec.tick(FPS)
-
+    
 pygame.quit()
